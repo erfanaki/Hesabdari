@@ -1,0 +1,1413 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>نرم‌افزار حسابداری حرفه‌ای</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css" rel="stylesheet">
+    <style>
+        * { font-family: 'Vazirmatn', sans-serif; }
+        .glass { background: rgba(255,255,255,0.1); backdrop-filter: blur(10px); }
+        .dark .glass { background: rgba(0,0,0,0.2); }
+        input, select, textarea { cursor: text !important; }
+        button, .clickable, [role="button"] { cursor: pointer !important; }
+        .animate-float { animation: float 3s ease-in-out infinite; }
+        @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-10px)} }
+        .animate-pulse-slow { animation: pulse 2s ease-in-out infinite; }
+        .gradient-bg { background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%); }
+        .dark .gradient-bg { background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%); }
+        .card-hover { transition: all 0.3s ease; }
+        .card-hover:hover { transform: translateY(-5px); box-shadow: 0 20px 40px rgba(0,0,0,0.2); }
+        .btn-primary { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+        .btn-primary:hover { background: linear-gradient(135deg, #764ba2 0%, #667eea 100%); transform: scale(1.05); }
+        .btn-danger { background: linear-gradient(135deg, #ff6b6b 0%, #ee5a5a 100%); }
+        .btn-success { background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%); }
+        .input-style { transition: all 0.3s ease; border: 2px solid transparent; }
+        .input-style:focus { border-color: #667eea; box-shadow: 0 0 20px rgba(102,126,234,0.3); }
+        .sidebar-item { transition: all 0.3s ease; }
+        .sidebar-item:hover { background: rgba(255,255,255,0.2); transform: translateX(-5px); }
+        .sidebar-item.active { background: rgba(255,255,255,0.3); border-right: 4px solid #fff; }
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: rgba(0,0,0,0.1); }
+        ::-webkit-scrollbar-thumb { background: linear-gradient(135deg, #667eea, #764ba2); border-radius: 4px; }
+        .table-row { transition: all 0.3s ease; }
+        .table-row:hover { background: rgba(102,126,234,0.1); transform: scale(1.01); }
+        .modal-overlay { animation: fadeIn 0.3s ease; }
+        .modal-content { animation: slideUp 0.3s ease; }
+        @keyframes fadeIn { from{opacity:0} to{opacity:1} }
+        @keyframes slideUp { from{transform:translateY(50px);opacity:0} to{transform:translateY(0);opacity:1} }
+        .stat-card { background: linear-gradient(135deg, var(--from), var(--to)); }
+        .persian-calendar { direction: rtl; }
+    </style>
+</head>
+<body class="min-h-screen transition-all duration-500">
+    <!-- Login Page -->
+    <div id="loginPage" class="min-h-screen gradient-bg flex items-center justify-center p-4">
+        <div class="glass rounded-3xl p-8 w-full max-w-md shadow-2xl animate-float">
+            <div class="text-center mb-8">
+                <div class="w-24 h-24 mx-auto bg-white/20 rounded-full flex items-center justify-center mb-4">
+                    <svg class="w-12 h-12 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                </div>
+                <h1 class="text-3xl font-bold text-white mb-2">حسابداری حرفه‌ای</h1>
+                <p class="text-white/70">به سیستم مدیریت مالی خوش آمدید</p>
+            </div>
+            
+            <div class="space-y-4">
+                <div>
+                    <label class="text-white/80 text-sm mb-1 block">نام کاربری</label>
+                    <input type="text" id="loginUsername" placeholder="نام کاربری را وارد کنید" 
+                        class="w-full px-4 py-3 rounded-xl bg-white/20 text-white placeholder-white/50 input-style outline-none">
+                </div>
+                
+                <div class="relative">
+                    <label class="text-white/80 text-sm mb-1 block">رمز عبور</label>
+                    <input type="password" id="loginPassword" placeholder="رمز عبور را وارد کنید"
+                        class="w-full px-4 py-3 rounded-xl bg-white/20 text-white placeholder-white/50 input-style outline-none">
+                    <button type="button" onclick="togglePasswordVisibility('loginPassword', 'eyeIcon1')" 
+                        class="absolute left-3 top-9 text-white/70 hover:text-white transition-colors cursor-pointer">
+                        <svg id="eyeIcon1" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                        </svg>
+                    </button>
+                </div>
+                
+                <p id="loginError" class="text-red-300 text-sm hidden">نام کاربری یا رمز عبور اشتباه است</p>
+                
+                <button onclick="login()" class="w-full py-3 bg-white text-purple-600 font-bold rounded-xl hover:bg-white/90 transition-all transform hover:scale-105 cursor-pointer shadow-lg">
+                    ورود به سیستم
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main App -->
+    <div id="mainApp" class="hidden min-h-screen bg-gray-100 dark:bg-gray-900 transition-colors duration-500">
+        <!-- Sidebar -->
+        <aside id="sidebar" class="fixed right-0 top-0 h-full w-64 gradient-bg shadow-2xl z-50 transform transition-transform duration-300">
+            <div class="p-6">
+                <div class="flex items-center gap-3 mb-8">
+                    <div class="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center">
+                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <p class="text-white font-bold" id="currentUserDisplay">کاربر</p>
+                        <p class="text-white/60 text-sm" id="userRoleDisplay">مدیر</p>
+                    </div>
+                </div>
+                
+                <nav class="space-y-2">
+                    <button onclick="showSection('dashboard')" id="nav-dashboard" class="sidebar-item w-full flex items-center gap-3 px-4 py-3 text-white rounded-xl cursor-pointer">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/>
+                        </svg>
+                        داشبورد
+                    </button>
+                    
+                    <button onclick="showSection('transactions')" id="nav-transactions" class="sidebar-item w-full flex items-center gap-3 px-4 py-3 text-white rounded-xl cursor-pointer">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                        </svg>
+                        تراکنش‌ها
+                    </button>
+                    
+                    <button onclick="showSection('reports')" id="nav-reports" class="sidebar-item w-full flex items-center gap-3 px-4 py-3 text-white rounded-xl cursor-pointer">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                        </svg>
+                        گزارشات
+                    </button>
+                    
+                    <button onclick="showSection('users')" id="nav-users" class="sidebar-item w-full flex items-center gap-3 px-4 py-3 text-white rounded-xl cursor-pointer">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"/>
+                        </svg>
+                        مدیریت کاربران
+                    </button>
+                </nav>
+                
+                <div class="absolute bottom-6 left-6 right-6 space-y-2">
+                    <button onclick="toggleTheme()" class="w-full flex items-center gap-3 px-4 py-3 text-white rounded-xl hover:bg-white/10 transition-all cursor-pointer">
+                        <svg id="themeIcon" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/>
+                        </svg>
+                        <span id="themeText">حالت شب</span>
+                    </button>
+                    
+                    <button onclick="logout()" class="w-full flex items-center gap-3 px-4 py-3 text-red-300 rounded-xl hover:bg-red-500/20 transition-all cursor-pointer">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
+                        </svg>
+                        خروج
+                    </button>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Mobile Menu Button -->
+        <button onclick="toggleSidebar()" class="lg:hidden fixed top-4 right-4 z-50 p-3 bg-purple-600 text-white rounded-xl shadow-lg cursor-pointer">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+            </svg>
+        </button>
+
+        <!-- Main Content -->
+        <main class="lg:mr-64 p-4 lg:p-8 transition-all duration-300">
+            <!-- Dashboard Section -->
+            <section id="dashboardSection" class="space-y-6">
+                <h2 class="text-2xl font-bold text-gray-800 dark:text-white mb-6">داشبورد</h2>
+                
+                <!-- Stats Cards -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <div class="card-hover rounded-2xl p-6 text-white shadow-xl" style="--from:#667eea;--to:#764ba2;background:linear-gradient(135deg,var(--from),var(--to))">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <p class="text-white/70 text-sm">موجودی کل</p>
+                                <p class="text-2xl font-bold mt-2" id="totalBalance">۰</p>
+                            </div>
+                            <div class="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="card-hover rounded-2xl p-6 text-white shadow-xl" style="background:linear-gradient(135deg,#2ecc71,#27ae60)">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <p class="text-white/70 text-sm">کل درآمد</p>
+                                <p class="text-2xl font-bold mt-2" id="totalIncome">۰</p>
+                            </div>
+                            <div class="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 11l5-5m0 0l5 5m-5-5v12"/>
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="card-hover rounded-2xl p-6 text-white shadow-xl" style="background:linear-gradient(135deg,#e74c3c,#c0392b)">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <p class="text-white/70 text-sm">کل هزینه</p>
+                                <p class="text-2xl font-bold mt-2" id="totalExpense">۰</p>
+                            </div>
+                            <div class="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 13l-5 5m0 0l-5-5m5 5V6"/>
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="card-hover rounded-2xl p-6 text-white shadow-xl" style="background:linear-gradient(135deg,#f39c12,#e67e22)">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <p class="text-white/70 text-sm">تعداد تراکنش</p>
+                                <p class="text-2xl font-bold mt-2" id="totalTransactions">۰</p>
+                            </div>
+                            <div class="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Charts -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-xl card-hover">
+                        <h3 class="text-lg font-bold text-gray-800 dark:text-white mb-4">نمودار ۳۰ روز اخیر</h3>
+                        <canvas id="chart30Days" height="200"></canvas>
+                    </div>
+                    
+                    <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-xl card-hover">
+                        <h3 class="text-lg font-bold text-gray-800 dark:text-white mb-4">نمودار سالانه (۱۲ ماهه)</h3>
+                        <canvas id="chartYearly" height="200"></canvas>
+                    </div>
+                    
+                    <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-xl card-hover">
+                        <h3 class="text-lg font-bold text-gray-800 dark:text-white mb-4">نمودار دسته‌بندی هزینه‌ها</h3>
+                        <canvas id="chartCategory" height="200"></canvas>
+                    </div>
+                    
+                    <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-xl card-hover">
+                        <h3 class="text-lg font-bold text-gray-800 dark:text-white mb-4">مقایسه درآمد و هزینه</h3>
+                        <canvas id="chartComparison" height="200"></canvas>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Transactions Section -->
+            <section id="transactionsSection" class="hidden space-y-6">
+                <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
+                    <h2 class="text-2xl font-bold text-gray-800 dark:text-white">تراکنش‌ها</h2>
+                    <button onclick="openTransactionModal()" class="btn-primary px-6 py-3 text-white rounded-xl shadow-lg transition-all cursor-pointer flex items-center gap-2">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                        </svg>
+                        افزودن تراکنش
+                    </button>
+                </div>
+
+                <!-- Filters -->
+                <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-xl">
+                    <h3 class="text-lg font-bold text-gray-800 dark:text-white mb-4">فیلتر پیشرفته</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                        <div>
+                            <label class="text-gray-600 dark:text-gray-300 text-sm mb-1 block">نوع تراکنش</label>
+                            <select id="filterType" onchange="filterTransactions()" class="w-full px-4 py-2 rounded-xl bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-white input-style outline-none cursor-pointer">
+                                <option value="">همه</option>
+                                <option value="income">درآمد</option>
+                                <option value="expense">هزینه</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="text-gray-600 dark:text-gray-300 text-sm mb-1 block">دسته‌بندی</label>
+                            <select id="filterCategory" onchange="filterTransactions()" class="w-full px-4 py-2 rounded-xl bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-white input-style outline-none cursor-pointer">
+                                <option value="">همه</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="text-gray-600 dark:text-gray-300 text-sm mb-1 block">از تاریخ</label>
+                            <input type="text" id="filterFromDate" onclick="openDatePicker(this)" readonly class="w-full px-4 py-2 rounded-xl bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-white input-style outline-none cursor-pointer" placeholder="انتخاب تاریخ">
+                        </div>
+                        <div>
+                            <label class="text-gray-600 dark:text-gray-300 text-sm mb-1 block">تا تاریخ</label>
+                            <input type="text" id="filterToDate" onclick="openDatePicker(this)" readonly class="w-full px-4 py-2 rounded-xl bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-white input-style outline-none cursor-pointer" placeholder="انتخاب تاریخ">
+                        </div>
+                    </div>
+                    <div class="mt-4 flex gap-2">
+                        <button onclick="filterTransactions()" class="btn-primary px-4 py-2 text-white rounded-xl transition-all cursor-pointer">اعمال فیلتر</button>
+                        <button onclick="clearFilters()" class="px-4 py-2 bg-gray-200 dark:bg-gray-600 text-gray-800 dark:text-white rounded-xl hover:bg-gray-300 dark:hover:bg-gray-500 transition-all cursor-pointer">پاک کردن</button>
+                    </div>
+                </div>
+
+                <!-- Transactions Table -->
+                <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-xl overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="w-full">
+                            <thead class="bg-gray-100 dark:bg-gray-700">
+                                <tr>
+                                    <th class="px-6 py-4 text-right text-gray-600 dark:text-gray-300">تاریخ</th>
+                                    <th class="px-6 py-4 text-right text-gray-600 dark:text-gray-300">عنوان</th>
+                                    <th class="px-6 py-4 text-right text-gray-600 dark:text-gray-300">دسته‌بندی</th>
+                                    <th class="px-6 py-4 text-right text-gray-600 dark:text-gray-300">نوع</th>
+                                    <th class="px-6 py-4 text-right text-gray-600 dark:text-gray-300">مبلغ (تومان)</th>
+                                    <th class="px-6 py-4 text-right text-gray-600 dark:text-gray-300">عملیات</th>
+                                </tr>
+                            </thead>
+                            <tbody id="transactionsTable" class="divide-y divide-gray-200 dark:divide-gray-600">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Reports Section -->
+            <section id="reportsSection" class="hidden space-y-6">
+                <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
+                    <h2 class="text-2xl font-bold text-gray-800 dark:text-white">گزارشات</h2>
+                    <button onclick="exportToExcel()" class="btn-success px-6 py-3 text-white rounded-xl shadow-lg transition-all cursor-pointer flex items-center gap-2 hover:scale-105">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                        </svg>
+                        خروجی Excel
+                    </button>
+                </div>
+
+                <!-- Report Stats -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-xl card-hover">
+                        <h3 class="text-lg font-bold text-gray-800 dark:text-white mb-4">آمار این ماه</h3>
+                        <div class="space-y-3">
+                            <div class="flex justify-between">
+                                <span class="text-gray-600 dark:text-gray-300">درآمد:</span>
+                                <span class="text-green-500 font-bold" id="monthIncome">۰</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-600 dark:text-gray-300">هزینه:</span>
+                                <span class="text-red-500 font-bold" id="monthExpense">۰</span>
+                            </div>
+                            <div class="flex justify-between border-t pt-3 dark:border-gray-600">
+                                <span class="text-gray-600 dark:text-gray-300">تراز:</span>
+                                <span class="font-bold" id="monthBalance">۰</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-xl card-hover">
+                        <h3 class="text-lg font-bold text-gray-800 dark:text-white mb-4">آمار امسال</h3>
+                        <div class="space-y-3">
+                            <div class="flex justify-between">
+                                <span class="text-gray-600 dark:text-gray-300">درآمد:</span>
+                                <span class="text-green-500 font-bold" id="yearIncome">۰</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-600 dark:text-gray-300">هزینه:</span>
+                                <span class="text-red-500 font-bold" id="yearExpense">۰</span>
+                            </div>
+                            <div class="flex justify-between border-t pt-3 dark:border-gray-600">
+                                <span class="text-gray-600 dark:text-gray-300">تراز:</span>
+                                <span class="font-bold" id="yearBalance">۰</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-xl card-hover">
+                        <h3 class="text-lg font-bold text-gray-800 dark:text-white mb-4">بیشترین هزینه‌ها</h3>
+                        <div id="topExpenses" class="space-y-3">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Category Report -->
+                <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-xl">
+                    <h3 class="text-lg font-bold text-gray-800 dark:text-white mb-4">گزارش دسته‌بندی</h3>
+                    <div id="categoryReport" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    </div>
+                </div>
+            </section>
+
+            <!-- Users Section -->
+            <section id="usersSection" class="hidden space-y-6">
+                <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
+                    <h2 class="text-2xl font-bold text-gray-800 dark:text-white">مدیریت کاربران</h2>
+                    <button onclick="openUserModal()" class="btn-primary px-6 py-3 text-white rounded-xl shadow-lg transition-all cursor-pointer flex items-center gap-2">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                        </svg>
+                        افزودن کاربر
+                    </button>
+                </div>
+
+                <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-xl overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="w-full">
+                            <thead class="bg-gray-100 dark:bg-gray-700">
+                                <tr>
+                                    <th class="px-6 py-4 text-right text-gray-600 dark:text-gray-300">نام کاربری</th>
+                                    <th class="px-6 py-4 text-right text-gray-600 dark:text-gray-300">نقش</th>
+                                    <th class="px-6 py-4 text-right text-gray-600 dark:text-gray-300">تاریخ ایجاد</th>
+                                    <th class="px-6 py-4 text-right text-gray-600 dark:text-gray-300">عملیات</th>
+                                </tr>
+                            </thead>
+                            <tbody id="usersTable" class="divide-y divide-gray-200 dark:divide-gray-600">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Transaction Modal -->
+    <div id="transactionModal" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 modal-overlay">
+        <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 w-full max-w-md shadow-2xl modal-content">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-xl font-bold text-gray-800 dark:text-white" id="transactionModalTitle">افزودن تراکنش</h3>
+                <button onclick="closeTransactionModal()" class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 cursor-pointer">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
+            
+            <input type="hidden" id="editTransactionId">
+            
+            <div class="space-y-4">
+                <div>
+                    <label class="text-gray-600 dark:text-gray-300 text-sm mb-1 block">عنوان</label>
+                    <input type="text" id="transactionTitle" class="w-full px-4 py-3 rounded-xl bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-white input-style outline-none" placeholder="عنوان تراکنش">
+                </div>
+                
+                <div>
+                    <label class="text-gray-600 dark:text-gray-300 text-sm mb-1 block">مبلغ (تومان)</label>
+                    <input type="text" id="transactionAmount" oninput="formatAmountInput(this)" class="w-full px-4 py-3 rounded-xl bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-white input-style outline-none" placeholder="۰">
+                </div>
+                
+                <div>
+                    <label class="text-gray-600 dark:text-gray-300 text-sm mb-1 block">نوع</label>
+                    <select id="transactionType" class="w-full px-4 py-3 rounded-xl bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-white input-style outline-none cursor-pointer">
+                        <option value="income">درآمد</option>
+                        <option value="expense">هزینه</option>
+                    </select>
+                </div>
+                
+                <div>
+                    <label class="text-gray-600 dark:text-gray-300 text-sm mb-1 block">دسته‌بندی</label>
+                    <select id="transactionCategory" class="w-full px-4 py-3 rounded-xl bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-white input-style outline-none cursor-pointer">
+                        <option value="حقوق">حقوق</option>
+                        <option value="فروش">فروش</option>
+                        <option value="خدمات">خدمات</option>
+                        <option value="خرید">خرید</option>
+                        <option value="قبوض">قبوض</option>
+                        <option value="حمل و نقل">حمل و نقل</option>
+                        <option value="غذا">غذا</option>
+                        <option value="سرگرمی">سرگرمی</option>
+                        <option value="سایر">سایر</option>
+                    </select>
+                </div>
+                
+                <div>
+                    <label class="text-gray-600 dark:text-gray-300 text-sm mb-1 block">تاریخ</label>
+                    <input type="text" id="transactionDate" onclick="openDatePicker(this)" readonly class="w-full px-4 py-3 rounded-xl bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-white input-style outline-none cursor-pointer" placeholder="انتخاب تاریخ">
+                </div>
+                
+                <div>
+                    <label class="text-gray-600 dark:text-gray-300 text-sm mb-1 block">توضیحات</label>
+                    <textarea id="transactionDescription" rows="2" class="w-full px-4 py-3 rounded-xl bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-white input-style outline-none resize-none" placeholder="توضیحات (اختیاری)"></textarea>
+                </div>
+                
+                <button onclick="saveTransaction()" class="w-full btn-primary py-3 text-white font-bold rounded-xl transition-all cursor-pointer">
+                    ذخیره
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- User Modal -->
+    <div id="userModal" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 modal-overlay">
+        <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 w-full max-w-md shadow-2xl modal-content">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-xl font-bold text-gray-800 dark:text-white">افزودن کاربر جدید</h3>
+                <button onclick="closeUserModal()" class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 cursor-pointer">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
+            
+            <div class="space-y-4">
+                <div>
+                    <label class="text-gray-600 dark:text-gray-300 text-sm mb-1 block">نام کاربری</label>
+                    <input type="text" id="newUsername" class="w-full px-4 py-3 rounded-xl bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-white input-style outline-none" placeholder="نام کاربری">
+                </div>
+                
+                <div class="relative">
+                    <label class="text-gray-600 dark:text-gray-300 text-sm mb-1 block">رمز عبور</label>
+                    <input type="password" id="newPassword" class="w-full px-4 py-3 rounded-xl bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-white input-style outline-none" placeholder="رمز عبور">
+                    <button type="button" onclick="togglePasswordVisibility('newPassword', 'eyeIcon2')" 
+                        class="absolute left-3 top-9 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 cursor-pointer">
+                        <svg id="eyeIcon2" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                        </svg>
+                    </button>
+                </div>
+                
+                <div>
+                    <label class="text-gray-600 dark:text-gray-300 text-sm mb-1 block">نقش</label>
+                    <select id="newUserRole" class="w-full px-4 py-3 rounded-xl bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-white input-style outline-none cursor-pointer">
+                        <option value="user">کاربر عادی</option>
+                        <option value="admin">مدیر</option>
+                    </select>
+                </div>
+                
+                <button onclick="addUser()" class="w-full btn-primary py-3 text-white font-bold rounded-xl transition-all cursor-pointer">
+                    ذخیره
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Date Picker Modal -->
+    <div id="datePickerModal" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 modal-overlay">
+        <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 w-full max-w-sm shadow-2xl modal-content persian-calendar">
+            <div class="flex justify-between items-center mb-4">
+                <button onclick="changeMonth(-1)" class="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg cursor-pointer">
+                    <svg class="w-5 h-5 text-gray-600 dark:text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                    </svg>
+                </button>
+                <span id="currentMonthYear" class="text-lg font-bold text-gray-800 dark:text-white"></span>
+                <button onclick="changeMonth(1)" class="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg cursor-pointer">
+                    <svg class="w-5 h-5 text-gray-600 dark:text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                    </svg>
+                </button>
+            </div>
+            
+            <div class="grid grid-cols-7 gap-1 mb-2">
+                <div class="text-center text-sm text-gray-500 dark:text-gray-400 py-2">ش</div>
+                <div class="text-center text-sm text-gray-500 dark:text-gray-400 py-2">ی</div>
+                <div class="text-center text-sm text-gray-500 dark:text-gray-400 py-2">د</div>
+                <div class="text-center text-sm text-gray-500 dark:text-gray-400 py-2">س</div>
+                <div class="text-center text-sm text-gray-500 dark:text-gray-400 py-2">چ</div>
+                <div class="text-center text-sm text-gray-500 dark:text-gray-400 py-2">پ</div>
+                <div class="text-center text-sm text-gray-500 dark:text-gray-400 py-2">ج</div>
+            </div>
+            
+            <div id="calendarDays" class="grid grid-cols-7 gap-1">
+            </div>
+            
+            <div class="flex gap-2 mt-4">
+                <button onclick="selectToday()" class="flex-1 py-2 bg-gray-200 dark:bg-gray-600 text-gray-800 dark:text-white rounded-xl hover:bg-gray-300 dark:hover:bg-gray-500 transition-all cursor-pointer">امروز</button>
+                <button onclick="closeDatePicker()" class="flex-1 py-2 bg-gray-200 dark:bg-gray-600 text-gray-800 dark:text-white rounded-xl hover:bg-gray-300 dark:hover:bg-gray-500 transition-all cursor-pointer">بستن</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="hidden fixed bottom-4 left-4 right-4 lg:left-auto lg:right-auto lg:bottom-8 lg:left-1/2 lg:-translate-x-1/2 bg-gray-800 text-white px-6 py-3 rounded-xl shadow-2xl z-50 transition-all transform">
+        <span id="toastMessage"></span>
+    </div>
+
+    <script>
+        // Persian months
+        const persianMonths = ['فروردین', 'اردیبهشت', 'خرداد', 'تیر', 'مرداد', 'شهریور', 'مهر', 'آبان', 'آذر', 'دی', 'بهمن', 'اسفند'];
+        
+        // Convert to Persian numbers
+        function toPersianNum(num) {
+            const persianDigits = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
+            return num.toString().replace(/\d/g, d => persianDigits[d]);
+        }
+        
+        // Convert Persian to English numbers
+        function toEnglishNum(str) {
+            const persianDigits = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
+            for (let i = 0; i < 10; i++) {
+                str = str.replace(new RegExp(persianDigits[i], 'g'), i);
+            }
+            return str;
+        }
+        
+        // Format number with thousand separator
+        function formatNumber(num) {
+            return toPersianNum(num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","));
+        }
+        
+        // Gregorian to Jalali conversion
+        function gregorianToJalali(gy, gm, gd) {
+            const g_d_m = [0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334];
+            let jy = (gy <= 1600) ? 0 : 979;
+            gy -= (gy <= 1600) ? 621 : 1600;
+            const gy2 = (gm > 2) ? (gy + 1) : gy;
+            let days = (365 * gy) + Math.floor((gy2 + 3) / 4) - Math.floor((gy2 + 99) / 100) + Math.floor((gy2 + 399) / 400) - 80 + gd + g_d_m[gm - 1];
+            jy += 33 * Math.floor(days / 12053);
+            days %= 12053;
+            jy += 4 * Math.floor(days / 1461);
+            days %= 1461;
+            jy += Math.floor((days - 1) / 365);
+            if (days > 365) days = (days - 1) % 365;
+            const jm = (days < 186) ? 1 + Math.floor(days / 31) : 7 + Math.floor((days - 186) / 30);
+            const jd = 1 + ((days < 186) ? (days % 31) : ((days - 186) % 30));
+            return [jy, jm, jd];
+        }
+        
+        // Jalali to Gregorian conversion
+        function jalaliToGregorian(jy, jm, jd) {
+            let gy = (jy <= 979) ? 621 : 1600;
+            jy -= (jy <= 979) ? 0 : 979;
+            const days = (365 * jy) + (Math.floor(jy / 33) * 8) + Math.floor(((jy % 33) + 3) / 4) + 78 + jd + ((jm < 7) ? (jm - 1) * 31 : ((jm - 7) * 30) + 186);
+            gy += 400 * Math.floor(days / 146097);
+            let d = days % 146097;
+            if (d > 36524) {
+                gy += 100 * Math.floor(--d / 36524);
+                d %= 36524;
+                if (d >= 365) d++;
+            }
+            gy += 4 * Math.floor(d / 1461);
+            d %= 1461;
+            gy += Math.floor((d - 1) / 365);
+            if (d > 365) d = (d - 1) % 365;
+            const g_d_m = [0, 31, (gy % 4 === 0 && gy % 100 !== 0) || (gy % 400 === 0) ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+            let gm = 0;
+            for (gm = 0; gm < 13 && d >= g_d_m[gm]; gm++) d -= g_d_m[gm];
+            return [gy, gm, d + 1];
+        }
+        
+        // Get today in Jalali
+        function getTodayJalali() {
+            const today = new Date();
+            return gregorianToJalali(today.getFullYear(), today.getMonth() + 1, today.getDate());
+        }
+        
+        // Get days in Jalali month
+        function getJalaliMonthDays(year, month) {
+            if (month <= 6) return 31;
+            if (month <= 11) return 30;
+            return ((year % 33 === 1 || year % 33 === 5 || year % 33 === 9 || year % 33 === 13 || 
+                    year % 33 === 17 || year % 33 === 22 || year % 33 === 26 || year % 33 === 30)) ? 30 : 29;
+        }
+        
+        // Get first day of Jalali month
+        function getFirstDayOfJalaliMonth(year, month) {
+            const [gy, gm, gd] = jalaliToGregorian(year, month, 1);
+            const date = new Date(gy, gm - 1, gd);
+            return (date.getDay() + 1) % 7;
+        }
+        
+        // Initialize data
+        let users = JSON.parse(localStorage.getItem('users')) || [
+            { username: 'Erfanaki', password: '@erfanaki20151378', role: 'admin', createdAt: '1403/01/01' },
+            { username: 'user1', password: 'user123', role: 'user', createdAt: '1403/01/01' }
+        ];
+        
+        let transactions = JSON.parse(localStorage.getItem('transactions')) || [];
+        let currentUser = null;
+        let isDarkMode = localStorage.getItem('darkMode') === 'true';
+        let activeSection = 'dashboard';
+        let currentDatePickerInput = null;
+        let calendarYear, calendarMonth;
+        let chart30Days, chartYearly, chartCategory, chartComparison;
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            if (isDarkMode) {
+                document.documentElement.classList.add('dark');
+                updateThemeUI();
+            }
+            
+            // Enter key for login
+            document.getElementById('loginPassword').addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') login();
+            });
+            document.getElementById('loginUsername').addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') login();
+            });
+            
+            const [y, m, d] = getTodayJalali();
+            calendarYear = y;
+            calendarMonth = m;
+        });
+        
+        // Toggle password visibility
+        function togglePasswordVisibility(inputId, iconId) {
+            const input = document.getElementById(inputId);
+            const icon = document.getElementById(iconId);
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"/>';
+            } else {
+                input.type = 'password';
+                icon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>';
+            }
+        }
+        
+        // Login
+        function login() {
+            const username = document.getElementById('loginUsername').value;
+            const password = document.getElementById('loginPassword').value;
+            
+            const user = users.find(u => u.username === username && u.password === password);
+            
+            if (user) {
+                currentUser = user;
+                document.getElementById('loginPage').classList.add('hidden');
+                document.getElementById('mainApp').classList.remove('hidden');
+                document.getElementById('currentUserDisplay').textContent = user.username;
+                document.getElementById('userRoleDisplay').textContent = user.role === 'admin' ? 'مدیر' : 'کاربر عادی';
+                
+                updateNavVisibility();
+                
+                if (user.role === 'admin') {
+                    showSection('dashboard');
+                } else {
+                    showSection('transactions');
+                }
+                
+                showToast('خوش آمدید ' + user.username);
+            } else {
+                document.getElementById('loginError').classList.remove('hidden');
+                setTimeout(() => {
+                    document.getElementById('loginError').classList.add('hidden');
+                }, 3000);
+            }
+        }
+        
+        // Logout
+        function logout() {
+            currentUser = null;
+            document.getElementById('mainApp').classList.add('hidden');
+            document.getElementById('loginPage').classList.remove('hidden');
+            document.getElementById('loginUsername').value = '';
+            document.getElementById('loginPassword').value = '';
+        }
+        
+        // Update navigation visibility based on role
+        function updateNavVisibility() {
+            const isAdmin = currentUser && currentUser.role === 'admin';
+            document.getElementById('nav-dashboard').style.display = isAdmin ? 'flex' : 'none';
+            document.getElementById('nav-reports').style.display = isAdmin ? 'flex' : 'none';
+            document.getElementById('nav-users').style.display = isAdmin ? 'flex' : 'none';
+        }
+        
+        // Show section
+        function showSection(section) {
+            if (currentUser.role !== 'admin' && (section === 'dashboard' || section === 'reports' || section === 'users')) {
+                showToast('شما به این بخش دسترسی ندارید', 'error');
+                return;
+            }
+            
+            activeSection = section;
+            
+            ['dashboard', 'transactions', 'reports', 'users'].forEach(s => {
+                document.getElementById(s + 'Section').classList.add('hidden');
+                document.getElementById('nav-' + s).classList.remove('active');
+            });
+            
+            document.getElementById(section + 'Section').classList.remove('hidden');
+            document.getElementById('nav-' + section).classList.add('active');
+            
+            if (section === 'dashboard') {
+                updateDashboard();
+            } else if (section === 'transactions') {
+                renderTransactions();
+                updateCategoryFilter();
+            } else if (section === 'reports') {
+                updateReports();
+            } else if (section === 'users') {
+                renderUsers();
+            }
+            
+            // Close sidebar on mobile
+            if (window.innerWidth < 1024) {
+                document.getElementById('sidebar').classList.add('-translate-x-full');
+            }
+        }
+        
+        // Toggle sidebar
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('-translate-x-full');
+        }
+        
+        // Toggle theme
+        function toggleTheme() {
+            isDarkMode = !isDarkMode;
+            localStorage.setItem('darkMode', isDarkMode);
+            document.documentElement.classList.toggle('dark');
+            updateThemeUI();
+            
+            if (activeSection === 'dashboard') {
+                setTimeout(updateDashboard, 100);
+            }
+        }
+        
+        function updateThemeUI() {
+            const icon = document.getElementById('themeIcon');
+            const text = document.getElementById('themeText');
+            if (isDarkMode) {
+                icon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/>';
+                text.textContent = 'حالت روز';
+            } else {
+                icon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/>';
+                text.textContent = 'حالت شب';
+            }
+        }
+        
+        // Format amount input
+        function formatAmountInput(input) {
+            let value = toEnglishNum(input.value).replace(/,/g, '').replace(/[^\d]/g, '');
+            if (value) {
+                input.value = formatNumber(parseInt(value));
+            }
+        }
+        
+        // Transaction Modal
+        function openTransactionModal(id = null) {
+            document.getElementById('transactionModal').classList.remove('hidden');
+            
+            if (id) {
+                const trans = transactions.find(t => t.id === id);
+                if (trans) {
+                    document.getElementById('transactionModalTitle').textContent = 'ویرایش تراکنش';
+                    document.getElementById('editTransactionId').value = id;
+                    document.getElementById('transactionTitle').value = trans.title;
+                    document.getElementById('transactionAmount').value = formatNumber(trans.amount);
+                    document.getElementById('transactionType').value = trans.type;
+                    document.getElementById('transactionCategory').value = trans.category;
+                    document.getElementById('transactionDate').value = trans.date;
+                    document.getElementById('transactionDescription').value = trans.description || '';
+                }
+            } else {
+                document.getElementById('transactionModalTitle').textContent = 'افزودن تراکنش';
+                document.getElementById('editTransactionId').value = '';
+                document.getElementById('transactionTitle').value = '';
+                document.getElementById('transactionAmount').value = '';
+                document.getElementById('transactionType').value = 'expense';
+                document.getElementById('transactionCategory').value = 'سایر';
+                const [y, m, d] = getTodayJalali();
+                document.getElementById('transactionDate').value = `${toPersianNum(y)}/${toPersianNum(m.toString().padStart(2, '0'))}/${toPersianNum(d.toString().padStart(2, '0'))}`;
+                document.getElementById('transactionDescription').value = '';
+            }
+        }
+        
+        function closeTransactionModal() {
+            document.getElementById('transactionModal').classList.add('hidden');
+        }
+        
+        // Save transaction
+        function saveTransaction() {
+            const title = document.getElementById('transactionTitle').value;
+            const amountStr = toEnglishNum(document.getElementById('transactionAmount').value).replace(/,/g, '');
+            const amount = parseInt(amountStr) || 0;
+            const type = document.getElementById('transactionType').value;
+            const category = document.getElementById('transactionCategory').value;
+            const date = document.getElementById('transactionDate').value;
+            const description = document.getElementById('transactionDescription').value;
+            const editId = document.getElementById('editTransactionId').value;
+            
+            if (!title || !amount || !date) {
+                showToast('لطفا فیلدهای ضروری را پر کنید', 'error');
+                return;
+            }
+            
+            if (editId) {
+                const index = transactions.findIndex(t => t.id === editId);
+                if (index !== -1) {
+                    transactions[index] = { ...transactions[index], title, amount, type, category, date, description };
+                }
+                showToast('تراکنش ویرایش شد');
+            } else {
+                const newTransaction = {
+                    id: Date.now().toString(),
+                    title,
+                    amount,
+                    type,
+                    category,
+                    date,
+                    description,
+                    user: currentUser.username,
+                    createdAt: new Date().toISOString()
+                };
+                transactions.unshift(newTransaction);
+                showToast('تراکنش ثبت شد');
+            }
+            
+            localStorage.setItem('transactions', JSON.stringify(transactions));
+            closeTransactionModal();
+            renderTransactions();
+            
+            if (activeSection === 'dashboard') {
+                updateDashboard();
+            }
+        }
+        
+        // Delete transaction
+        function deleteTransaction(id) {
+            if (confirm('آیا از حذف این تراکنش مطمئن هستید؟')) {
+                transactions = transactions.filter(t => t.id !== id);
+                localStorage.setItem('transactions', JSON.stringify(transactions));
+                renderTransactions();
+                showToast('تراکنش حذف شد');
+                
+                if (activeSection === 'dashboard') {
+                    updateDashboard();
+                }
+            }
+        }
+        
+        // Render transactions
+        function renderTransactions() {
+            const tbody = document.getElementById('transactionsTable');
+            let filteredTrans = getFilteredTransactions();
+            
+            // Filter by user for non-admin
+            if (currentUser.role !== 'admin') {
+                filteredTrans = filteredTrans.filter(t => t.user === currentUser.username);
+            }
+            
+            if (filteredTrans.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" class="px-6 py-8 text-center text-gray-500 dark:text-gray-400">هیچ تراکنشی یافت نشد</td></tr>';
+                return;
+            }
+            
+            tbody.innerHTML = filteredTrans.map(t => `
+                <tr class="table-row">
+                    <td class="px-6 py-4 text-gray-800 dark:text-white">${t.date}</td>
+                    <td class="px-6 py-4 text-gray-800 dark:text-white">${t.title}</td>
+                    <td class="px-6 py-4 text-gray-800 dark:text-white">${t.category}</td>
+                    <td class="px-6 py-4">
+                        <span class="px-3 py-1 rounded-full text-sm ${t.type === 'income' ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'}">
+                            ${t.type === 'income' ? 'درآمد' : 'هزینه'}
+                        </span>
+                    </td>
+                    <td class="px-6 py-4 font-bold ${t.type === 'income' ? 'text-green-500' : 'text-red-500'}">
+                        ${t.type === 'income' ? '+' : '-'}${formatNumber(t.amount)}
+                    </td>
+                    <td class="px-6 py-4">
+                        <div class="flex gap-2">
+                            <button onclick="openTransactionModal('${t.id}')" class="p-2 text-blue-500 hover:bg-blue-100 dark:hover:bg-blue-900/30 rounded-lg transition-all cursor-pointer">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                                </svg>
+                            </button>
+                            <button onclick="deleteTransaction('${t.id}')" class="p-2 text-red-500 hover:bg-red-100 dark:hover:bg-red-900/30 rounded-lg transition-all cursor-pointer">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                </svg>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+        }
+        
+        // Get filtered transactions
+        function getFilteredTransactions() {
+            let filtered = [...transactions];
+            
+            const type = document.getElementById('filterType').value;
+            const category = document.getElementById('filterCategory').value;
+            const fromDate = document.getElementById('filterFromDate').value;
+            const toDate = document.getElementById('filterToDate').value;
+            
+            if (type) filtered = filtered.filter(t => t.type === type);
+            if (category) filtered = filtered.filter(t => t.category === category);
+            if (fromDate) filtered = filtered.filter(t => t.date >= fromDate);
+            if (toDate) filtered = filtered.filter(t => t.date <= toDate);
+            
+            return filtered;
+        }
+        
+        // Filter transactions
+        function filterTransactions() {
+            renderTransactions();
+        }
+        
+        // Clear filters
+        function clearFilters() {
+            document.getElementById('filterType').value = '';
+            document.getElementById('filterCategory').value = '';
+            document.getElementById('filterFromDate').value = '';
+            document.getElementById('filterToDate').value = '';
+            renderTransactions();
+        }
+        
+        // Update category filter
+        function updateCategoryFilter() {
+            const categories = [...new Set(transactions.map(t => t.category))];
+            const select = document.getElementById('filterCategory');
+            select.innerHTML = '<option value="">همه</option>' + categories.map(c => `<option value="${c}">${c}</option>`).join('');
+        }
+        
+        // Date Picker
+        function openDatePicker(input) {
+            currentDatePickerInput = input;
+            document.getElementById('datePickerModal').classList.remove('hidden');
+            renderCalendar();
+        }
+        
+        function closeDatePicker() {
+            document.getElementById('datePickerModal').classList.add('hidden');
+            currentDatePickerInput = null;
+        }
+        
+        function renderCalendar() {
+            document.getElementById('currentMonthYear').textContent = `${persianMonths[calendarMonth - 1]} ${toPersianNum(calendarYear)}`;
+            
+            const days = getJalaliMonthDays(calendarYear, calendarMonth);
+            const firstDay = getFirstDayOfJalaliMonth(calendarYear, calendarMonth);
+            const [ty, tm, td] = getTodayJalali();
+            
+            let html = '';
+            
+            for (let i = 0; i < firstDay; i++) {
+                html += '<div></div>';
+            }
+            
+            for (let d = 1; d <= days; d++) {
+                const isToday = calendarYear === ty && calendarMonth === tm && d === td;
+                html += `<button onclick="selectDate(${calendarYear}, ${calendarMonth}, ${d})" 
+                    class="p-2 text-center rounded-lg hover:bg-purple-100 dark:hover:bg-purple-900/30 transition-all cursor-pointer
+                    ${isToday ? 'bg-purple-500 text-white hover:bg-purple-600' : 'text-gray-800 dark:text-white'}">
+                    ${toPersianNum(d)}
+                </button>`;
+            }
+            
+            document.getElementById('calendarDays').innerHTML = html;
+        }
+        
+        function changeMonth(delta) {
+            calendarMonth += delta;
+            if (calendarMonth > 12) {
+                calendarMonth = 1;
+                calendarYear++;
+            } else if (calendarMonth < 1) {
+                calendarMonth = 12;
+                calendarYear--;
+            }
+            renderCalendar();
+        }
+        
+        function selectDate(year, month, day) {
+            const dateStr = `${toPersianNum(year)}/${toPersianNum(month.toString().padStart(2, '0'))}/${toPersianNum(day.toString().padStart(2, '0'))}`;
+            if (currentDatePickerInput) {
+                currentDatePickerInput.value = dateStr;
+            }
+            closeDatePicker();
+        }
+        
+        function selectToday() {
+            const [y, m, d] = getTodayJalali();
+            selectDate(y, m, d);
+        }
+        
+        // User Modal
+        function openUserModal() {
+            document.getElementById('userModal').classList.remove('hidden');
+            document.getElementById('newUsername').value = '';
+            document.getElementById('newPassword').value = '';
+            document.getElementById('newUserRole').value = 'user';
+        }
+        
+        function closeUserModal() {
+            document.getElementById('userModal').classList.add('hidden');
+        }
+        
+        // Add user
+        function addUser() {
+            const username = document.getElementById('newUsername').value;
+            const password = document.getElementById('newPassword').value;
+            const role = document.getElementById('newUserRole').value;
+            
+            if (!username || !password) {
+                showToast('لطفا فیلدهای ضروری را پر کنید', 'error');
+                return;
+            }
+            
+            if (users.find(u => u.username === username)) {
+                showToast('این نام کاربری قبلا استفاده شده', 'error');
+                return;
+            }
+            
+            const [y, m, d] = getTodayJalali();
+            users.push({
+                username,
+                password,
+                role,
+                createdAt: `${toPersianNum(y)}/${toPersianNum(m.toString().padStart(2, '0'))}/${toPersianNum(d.toString().padStart(2, '0'))}`
+            });
+            
+            localStorage.setItem('users', JSON.stringify(users));
+            closeUserModal();
+            renderUsers();
+            showToast('کاربر جدید اضافه شد');
+        }
+        
+        // Delete user
+        function deleteUser(username) {
+            if (username === 'Erfanaki') {
+                showToast('مدیر اصلی قابل حذف نیست', 'error');
+                return;
+            }
+            
+            if (confirm('آیا از حذف این کاربر مطمئن هستید؟')) {
+                users = users.filter(u => u.username !== username);
+                localStorage.setItem('users', JSON.stringify(users));
+                renderUsers();
+                showToast('کاربر حذف شد');
+            }
+        }
+        
+        // Render users
+        function renderUsers() {
+            const tbody = document.getElementById('usersTable');
+            tbody.innerHTML = users.map(u => `
+                <tr class="table-row">
+                    <td class="px-6 py-4 text-gray-800 dark:text-white">${u.username}</td>
+                    <td class="px-6 py-4">
+                        <span class="px-3 py-1 rounded-full text-sm ${u.role === 'admin' ? 'bg-purple-100 text-purple-600' : 'bg-blue-100 text-blue-600'}">
+                            ${u.role === 'admin' ? 'مدیر' : 'کاربر عادی'}
+                        </span>
+                    </td>
+                    <td class="px-6 py-4 text-gray-800 dark:text-white">${u.createdAt}</td>
+                    <td class="px-6 py-4">
+                        ${u.username !== 'Erfanaki' ? `
+                            <button onclick="deleteUser('${u.username}')" class="p-2 text-red-500 hover:bg-red-100 dark:hover:bg-red-900/30 rounded-lg transition-all cursor-pointer">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                </svg>
+                            </button>
+                        ` : '<span class="text-gray-400">-</span>'}
+                    </td>
+                </tr>
+            `).join('');
+        }
+        
+        // Update Dashboard
+        function updateDashboard() {
+            const income = transactions.filter(t => t.type === 'income').reduce((sum, t) => sum + t.amount, 0);
+            const expense = transactions.filter(t => t.type === 'expense').reduce((sum, t) => sum + t.amount, 0);
+            const balance = income - expense;
+            
+            document.getElementById('totalBalance').textContent = formatNumber(balance) + ' تومان';
+            document.getElementById('totalIncome').textContent = formatNumber(income) + ' تومان';
+            document.getElementById('totalExpense').textContent = formatNumber(expense) + ' تومان';
+            document.getElementById('totalTransactions').textContent = toPersianNum(transactions.length);
+            
+            updateCharts();
+        }
+        
+        // Update Charts
+        function updateCharts() {
+            const textColor = isDarkMode ? '#fff' : '#374151';
+            
+            // Destroy existing charts
+            if (chart30Days) chart30Days.destroy();
+            if (chartYearly) chartYearly.destroy();
+            if (chartCategory) chartCategory.destroy();
+            if (chartComparison) chartComparison.destroy();
+            
+            // Get current Jalali date
+            const [currentYear, currentMonth] = getTodayJalali();
+            
+            // Calculate data for last 30 days
+            const last30DaysLabels = [];
+            const last30DaysIncome = [];
+            const last30DaysExpense = [];
+            
+            for (let i = 29; i >= 0; i--) {
+                const date = new Date();
+                date.setDate(date.getDate() - i);
+                const [jy, jm, jd] = gregorianToJalali(date.getFullYear(), date.getMonth() + 1, date.getDate());
+                const dateStr = `${toPersianNum(jy)}/${toPersianNum(jm.toString().padStart(2, '0'))}/${toPersianNum(jd.toString().padStart(2, '0'))}`;
+                last30DaysLabels.push(`${jm}/${jd}`);
+                
+                // Calculate income and expense for this day
+                const dayIncome = transactions.filter(t => t.date === dateStr && t.type === 'income').reduce((sum, t) => sum + t.amount, 0);
+                const dayExpense = transactions.filter(t => t.date === dateStr && t.type === 'expense').reduce((sum, t) => sum + t.amount, 0);
+                last30DaysIncome.push(dayIncome);
+                last30DaysExpense.push(dayExpense);
+            }
+            
+            // 30 Days Chart
+            const ctx1 = document.getElementById('chart30Days').getContext('2d');
+            chart30Days = new Chart(ctx1, {
+                type: 'line',
+                data: {
+                    labels: last30DaysLabels.map(d => toPersianNum(d)),
+                    datasets: [{
+                        label: 'درآمد',
+                        data: last30DaysIncome,
+                        borderColor: '#2ecc71',
+                        backgroundColor: 'rgba(46, 204, 113, 0.1)',
+                        fill: true,
+                        tension: 0.4
+                    }, {
+                        label: 'هزینه',
+                        data: last30DaysExpense,
+                        borderColor: '#e74c3c',
+                        backgroundColor: 'rgba(231, 76, 60, 0.1)',
+                        fill: true,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: { legend: { labels: { color: textColor } } },
+                    scales: {
+                        x: { ticks: { color: textColor } },
+                        y: { ticks: { color: textColor } }
+                    }
+                }
+            });
+            
+            // Calculate yearly data (12 months)
+            const yearlyIncome = [];
+            const yearlyExpense = [];
+            
+            for (let month = 1; month <= 12; month++) {
+                const monthIncome = transactions.filter(t => {
+                    const parts = toEnglishNum(t.date).split('/');
+                    return parseInt(parts[0]) === currentYear && parseInt(parts[1]) === month && t.type === 'income';
+                }).reduce((sum, t) => sum + t.amount, 0);
+                
+                const monthExpense = transactions.filter(t => {
+                    const parts = toEnglishNum(t.date).split('/');
+                    return parseInt(parts[0]) === currentYear && parseInt(parts[1]) === month && t.type === 'expense';
+                }).reduce((sum, t) => sum + t.amount, 0);
+                
+                yearlyIncome.push(monthIncome);
+                yearlyExpense.push(monthExpense);
+            }
+            
+            // Yearly Chart
+            const ctx2 = document.getElementById('chartYearly').getContext('2d');
+            chartYearly = new Chart(ctx2, {
+                type: 'bar',
+                data: {
+                    labels: persianMonths,
+                    datasets: [{
+                        label: 'درآمد',
+                        data: yearlyIncome,
+                        backgroundColor: 'rgba(46, 204, 113, 0.8)'
+                    }, {
+                        label: 'هزینه',
+                        data: yearlyExpense,
+                        backgroundColor: 'rgba(231, 76, 60, 0.8)'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: { legend: { labels: { color: textColor } } },
+                    scales: {
+                        x: { ticks: { color: textColor } },
+                        y: { ticks: { color: textColor } }
+                    }
+                }
+            });
+            
+            // Calculate category data (expenses only)
+            const categoryTotals = {};
+            transactions.filter(t => t.type === 'expense').forEach(t => {
+                categoryTotals[t.category] = (categoryTotals[t.category] || 0) + t.amount;
+            });
+            
+            const categoryLabels = Object.keys(categoryTotals);
+            const categoryData = Object.values(categoryTotals);
+            const categoryColors = ['#667eea', '#764ba2', '#f093fb', '#2ecc71', '#f39c12', '#e74c3c', '#3498db', '#9b59b6', '#1abc9c'];
+            
+            // Category Pie Chart
+            const ctx3 = document.getElementById('chartCategory').getContext('2d');
+            chartCategory = new Chart(ctx3, {
+                type: 'doughnut',
+                data: {
+                    labels: categoryLabels.length > 0 ? categoryLabels : ['بدون داده'],
+                    datasets: [{
+                        data: categoryData.length > 0 ? categoryData : [1],
+                        backgroundColor: categoryLabels.length > 0 ? categoryColors.slice(0, categoryLabels.length) : ['#cccccc']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: { legend: { position: 'bottom', labels: { color: textColor } } }
+                }
+            });
+            
+            // Comparison Chart
+            const ctx4 = document.getElementById('chartComparison').getContext('2d');
+            const totalIncome = transactions.filter(t => t.type === 'income').reduce((sum, t) => sum + t.amount, 0);
+            const totalExpense = transactions.filter(t => t.type === 'expense').reduce((sum, t) => sum + t.amount, 0);
+            
+            chartComparison = new Chart(ctx4, {
+                type: 'bar',
+                data: {
+                    labels: ['درآمد کل', 'هزینه کل', 'موجودی'],
+                    datasets: [{
+                        data: [totalIncome, totalExpense, totalIncome - totalExpense],
+                        backgroundColor: ['rgba(46, 204, 113, 0.8)', 'rgba(231, 76, 60, 0.8)', 'rgba(102, 126, 234, 0.8)']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        x: { ticks: { color: textColor } },
+                        y: { ticks: { color: textColor } }
+                    }
+                }
+            });
+        }
+        
+        // Update Reports
+        function updateReports() {
+            const [ty, tm] = getTodayJalali();
+            
+            // This month
+            const monthTrans = transactions.filter(t => {
+                const parts = toEnglishNum(t.date).split('/');
+                return parseInt(parts[0]) === ty && parseInt(parts[1]) === tm;
+            });
+            
+            const monthIncome = monthTrans.filter(t => t.type === 'income').reduce((sum, t) => sum + t.amount, 0);
+            const monthExpense = monthTrans.filter(t => t.type === 'expense').reduce((sum, t) => sum + t.amount, 0);
+            
+            document.getElementById('monthIncome').textContent = formatNumber(monthIncome) + ' تومان';
+            document.getElementById('monthExpense').textContent = formatNumber(monthExpense) + ' تومان';
+            document.getElementById('monthBalance').textContent = formatNumber(monthIncome - monthExpense) + ' تومان';
+            document.getElementById('monthBalance').className = `font-bold ${monthIncome - monthExpense >= 0 ? 'text-green-500' : 'text-red-500'}`;
+            
+            // This year
+            const yearTrans = transactions.filter(t => {
+                const parts = toEnglishNum(t.date).split('/');
+                return parseInt(parts[0]) === ty;
+            });
+            
+            const yearIncome = yearTrans.filter(t => t.type === 'income').reduce((sum, t) => sum + t.amount, 0);
+            const yearExpense = yearTrans.filter(t => t.type === 'expense').reduce((sum, t) => sum + t.amount, 0);
+            
+            document.getElementById('yearIncome').textContent = formatNumber(yearIncome) + ' تومان';
+            document.getElementById('yearExpense').textContent = formatNumber(yearExpense) + ' تومان';
+            document.getElementById('yearBalance').textContent = formatNumber(yearIncome - yearExpense) + ' تومان';
+            document.getElementById('yearBalance').className = `font-bold ${yearIncome - yearExpense >= 0 ? 'text-green-500' : 'text-red-500'}`;
+            
+            // Top expenses
+            const expenses = transactions.filter(t => t.type === 'expense').sort((a, b) => b.amount - a.amount).slice(0, 5);
+            document.getElementById('topExpenses').innerHTML = expenses.length ? expenses.map(e => `
+                <div class="flex justify-between items-center">
+                    <span class="text-gray-600 dark:text-gray-300">${e.title}</span>
+                    <span class="text-red-500 font-bold">${formatNumber(e.amount)}</span>
+                </div>
+            `).join('') : '<p class="text-gray-500 dark:text-gray-400">هزینه‌ای ثبت نشده</p>';
+            
+            // Category report
+            const categoryTotals = {};
+            transactions.forEach(t => {
+                if (!categoryTotals[t.category]) categoryTotals[t.category] = { income: 0, expense: 0 };
+                categoryTotals[t.category][t.type] += t.amount;
+            });
+            
+            document.getElementById('categoryReport').innerHTML = Object.entries(categoryTotals).map(([cat, totals]) => `
+                <div class="bg-gray-100 dark:bg-gray-700 rounded-xl p-4">
+                    <h4 class="font-bold text-gray-800 dark:text-white mb-2">${cat}</h4>
+                    <div class="space-y-1 text-sm">
+                        <div class="flex justify-between">
+                            <span class="text-gray-600 dark:text-gray-300">درآمد:</span>
+                            <span class="text-green-500">${formatNumber(totals.income)}</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-600 dark:text-gray-300">هزینه:</span>
+                            <span class="text-red-500">${formatNumber(totals.expense)}</span>
+                        </div>
+                    </div>
+                </div>
+            `).join('') || '<p class="text-gray-500 dark:text-gray-400 col-span-full text-center">داده‌ای وجود ندارد</p>';
+        }
+        
+        // Export to Excel
+        function exportToExcel() {
+            const data = transactions.map(t => ({
+                'تاریخ': t.date,
+                'عنوان': t.title,
+                'دسته‌بندی': t.category,
+                'نوع': t.type === 'income' ? 'درآمد' : 'هزینه',
+                'مبلغ': t.amount,
+                'توضیحات': t.description || ''
+            }));
+            
+            const ws = XLSX.utils.json_to_sheet(data);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, 'تراکنش‌ها');
+            
+            const [y, m, d] = getTodayJalali();
+            XLSX.writeFile(wb, `گزارش-مالی-${y}-${m}-${d}.xlsx`);
+            
+            showToast('فایل Excel دانلود شد');
+        }
+        
+        // Toast
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            const toastMessage = document.getElementById('toastMessage');
+            
+            toastMessage.textContent = message;
+            toast.className = `fixed bottom-4 left-4 right-4 lg:left-auto lg:right-auto lg:bottom-8 lg:left-1/2 lg:-translate-x-1/2 px-6 py-3 rounded-xl shadow-2xl z-50 transition-all transform ${type === 'error' ? 'bg-red-500' : 'bg-green-500'} text-white`;
+            
+            setTimeout(() => {
+                toast.classList.add('hidden');
+            }, 3000);
+        }
+    </script>
+</body>
+</html>
